@@ -24,7 +24,7 @@ export default function TextChatPage() {
   }, [messages])
 
   const connect = () => {
-    const ws = new WebSocket("ws://localhost:3001")
+    const ws = new WebSocket("wss://sayhi-1-zcci.onrender.com/")
     wsRef.current = ws
 
     ws.onmessage = async e => {
