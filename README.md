@@ -107,7 +107,7 @@ ws://localhost:3000
 ### 2️⃣ Start the Frontend
 
 ```bash
-cd sayhi-next
+cd sayhi
 npm install
 npm run dev
 ```
@@ -130,12 +130,7 @@ http://localhost:3000
 
 ### Frontend
 
-* Can be deployed on:
-
-  * Vercel
-  * Netlify
-  * Render
-  * Any Node-compatible host
+* Deployed on: **Vercel**
 
 ---
 
