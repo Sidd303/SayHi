@@ -1,22 +1,25 @@
 const http = require("http")
 const WebSocket = require("ws")
 
+// 🔴 REQUIRED FOR RENDER
 const PORT = process.env.PORT || 3000
 
-// Create HTTP server (required by Render)
+// HTTP server (Render requirement)
 const server = http.createServer((req, res) => {
-  res.writeHead(200)
-  res.end("WebSocket server is running")
+  res.writeHead(200, { "Content-Type": "text/plain" })
+  res.end("✅ SayHi signaling server running")
 })
 
-// Attach WebSocket to HTTP server
+// WebSocket server attached to HTTP server
 const wss = new WebSocket.Server({ server })
 
 let waiting = null
 const pairs = new Map()
 
 wss.on("connection", ws => {
-  if (waiting) {
+  console.log("🔌 Client connected")
+
+  if (waiting && waiting.readyState === WebSocket.OPEN) {
     pairs.set(ws, waiting)
     pairs.set(waiting, ws)
 
@@ -26,30 +29,51 @@ wss.on("connection", ws => {
     waiting = null
   } else {
     waiting = ws
+    ws.send(JSON.stringify({ type: "waiting" }))
   }
 
   ws.on("message", msg => {
-    const data = JSON.parse(msg)
+    let data
+    try {
+      data = JSON.parse(msg.toString())
+    } catch {
+      return
+    }
+
     const peer = pairs.get(ws)
 
+    // 🔴 Handle skip / leave
     if (data.type === "leave") {
-      if (peer) peer.send(JSON.stringify({ type: "leave" }))
+      if (peer && peer.readyState === WebSocket.OPEN) {
+        peer.send(JSON.stringify({ type: "leave" }))
+      }
       pairs.delete(peer)
       pairs.delete(ws)
       waiting = ws
       return
     }
 
-    if (peer) peer.send(JSON.stringify(data))
+    if (peer && peer.readyState === WebSocket.OPEN) {
+      peer.send(JSON.stringify(data))
+    }
   })
 
   ws.on("close", () => {
+    console.log("❌ Client disconnected")
+
     const peer = pairs.get(ws)
-    if (peer) peer.send(JSON.stringify({ type: "leave" }))
+    if (peer && peer.readyState === WebSocket.OPEN) {
+      peer.send(JSON.stringify({ type: "leave" }))
+    }
+
+    pairs.delete(peer)
     pairs.delete(ws)
+
+    if (waiting === ws) waiting = null
   })
 })
 
+// 🔴 Render listens here
 server.listen(PORT, () => {
-  console.log(`✅ WebSocket server running on port ${PORT}`)
+  console.log(`✅ Signaling server running on port ${PORT}`)
 })
