@@ -1,5 +1,16 @@
+const http = require("http")
 const WebSocket = require("ws")
-const wss = new WebSocket.Server({ port: 3001 })
+
+const PORT = process.env.PORT || 3000
+
+// Create HTTP server (required by Render)
+const server = http.createServer((req, res) => {
+  res.writeHead(200)
+  res.end("WebSocket server is running")
+})
+
+// Attach WebSocket to HTTP server
+const wss = new WebSocket.Server({ server })
 
 let waiting = null
 const pairs = new Map()
@@ -17,22 +28,20 @@ wss.on("connection", ws => {
     waiting = ws
   }
 
- ws.on("message", msg => {
-  const data = JSON.parse(msg)
-  const peer = pairs.get(ws)
+  ws.on("message", msg => {
+    const data = JSON.parse(msg)
+    const peer = pairs.get(ws)
 
-  // 🔴 Handle skip / leave
-  if (data.type === "leave") {
-    if (peer) peer.send(JSON.stringify({ type: "leave" }))
-    pairs.delete(peer)
-    pairs.delete(ws)
-    waiting = ws
-    return
-  }
+    if (data.type === "leave") {
+      if (peer) peer.send(JSON.stringify({ type: "leave" }))
+      pairs.delete(peer)
+      pairs.delete(ws)
+      waiting = ws
+      return
+    }
 
-  if (peer) peer.send(JSON.stringify(data))
-})
-
+    if (peer) peer.send(JSON.stringify(data))
+  })
 
   ws.on("close", () => {
     const peer = pairs.get(ws)
@@ -41,4 +50,6 @@ wss.on("connection", ws => {
   })
 })
 
-console.log("✅ Signaling server running on ws://localhost:3001")
+server.listen(PORT, () => {
+  console.log(`✅ WebSocket server running on port ${PORT}`)
+})
