@@ -30,7 +30,7 @@ export default function HomePage() {
 
         {/* Video Chat */}
         <button
-          onClick={() => router.push("/chat")}
+          onClick={() => router.push("/video")}
           className="w-full px-6 py-4 rounded-xl bg-blue-600 hover:bg-blue-700 transition-all font-semibold text-lg shadow-lg"
         >
           🎥 Video Chat
