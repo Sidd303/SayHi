@@ -1,10 +1,9 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, forwardRef } from "react"
 import { useRouter } from "next/navigation"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { forwardRef } from "react"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -13,6 +12,10 @@ export default function AnimeLanding() {
   const sections = useRef<HTMLDivElement[]>([])
 
   useEffect(() => {
+    // ✅ clean slate (important for StrictMode)
+    sections.current = []
+    ScrollTrigger.getAll().forEach(t => t.kill())
+
     sections.current.forEach((section) => {
       gsap.fromTo(
         section.children,
@@ -27,7 +30,7 @@ export default function AnimeLanding() {
             trigger: section,
             start: "top 75%",
             end: "top 35%",
-            scrub: true, // 🔥 reverse on unscroll
+            scrub: true, // 🔥 reverses on scroll up
           },
         }
       )
@@ -39,7 +42,12 @@ export default function AnimeLanding() {
   return (
     <main>
 
-      <Section className="bg-episode-1" ref={el => el && sections.current.push(el)}>
+      <Section
+        className="bg-episode-1"
+        ref={(el) => {
+          if (el) sections.current.push(el)
+        }}
+      >
         <h1 className="anime-title text-8xl md:text-9xl text-blue-400">
           SAYHI
         </h1>
@@ -49,7 +57,12 @@ export default function AnimeLanding() {
         </p>
       </Section>
 
-      <Section className="bg-episode-2" ref={el => el && sections.current.push(el)}>
+      <Section
+        className="bg-episode-2"
+        ref={(el) => {
+          if (el) sections.current.push(el)
+        }}
+      >
         <h2 className="anime-title text-6xl">THE POWER</h2>
         <div className="grid md:grid-cols-3 gap-10 max-w-6xl">
           <Panel title="⚡ Instant Match" />
@@ -58,7 +71,12 @@ export default function AnimeLanding() {
         </div>
       </Section>
 
-      <Section className="bg-episode-3" ref={el => el && sections.current.push(el)}>
+      <Section
+        className="bg-episode-3"
+        ref={(el) => {
+          if (el) sections.current.push(el)
+        }}
+      >
         <h2 className="anime-title text-6xl text-pink-400">
           THE CHARACTERS
         </h2>
@@ -68,7 +86,12 @@ export default function AnimeLanding() {
         </p>
       </Section>
 
-      <Section className="bg-episode-4" ref={el => el && sections.current.push(el)}>
+      <Section
+        className="bg-episode-4"
+        ref={(el) => {
+          if (el) sections.current.push(el)
+        }}
+      >
         <h2 className="anime-title text-6xl text-red-400">
           ENTER THE ACTION
         </h2>
@@ -78,7 +101,12 @@ export default function AnimeLanding() {
         </div>
       </Section>
 
-      <Section className="bg-final" ref={el => el && sections.current.push(el)}>
+      <Section
+        className="bg-final"
+        ref={(el) => {
+          if (el) sections.current.push(el)
+        }}
+      >
         <h2 className="anime-title text-7xl">
           YOUR STORY STARTS NOW
         </h2>
@@ -98,11 +126,14 @@ export default function AnimeLanding() {
 
 const Section = forwardRef<
   HTMLDivElement,
-  { children: React.ReactNode; className?: string }
+  {
+    children: React.ReactNode
+    className?: string
+  }
 >(({ children, className }, ref) => (
   <section
     ref={ref}
-    className={`min-h-screen flex flex-col items-center justify-center gap-10 px-6 text-center ${className}`}
+    className={`min-h-screen flex flex-col items-center justify-center gap-10 px-6 text-center ${className ?? ""}`}
   >
     {children}
   </section>
