@@ -1,46 +1,135 @@
 "use client"
 
+import { useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { forwardRef } from "react"
 
-export default function HomePage() {
+gsap.registerPlugin(ScrollTrigger)
+
+export default function AnimeLanding() {
   const router = useRouter()
+  const sections = useRef<HTMLDivElement[]>([])
+
+  useEffect(() => {
+    sections.current.forEach((section) => {
+      gsap.fromTo(
+        section.children,
+        { opacity: 0, y: 120, scale: 0.95 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          stagger: 0.15,
+          ease: "power4.out",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 75%",
+            end: "top 35%",
+            scrub: true, // 🔥 reverse on unscroll
+          },
+        }
+      )
+    })
+
+    return () => ScrollTrigger.getAll().forEach(t => t.kill())
+  }, [])
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-black text-white px-6">
-      {/* Logo */}
-      <h1 className="text-5xl font-bold mb-4">
-        👋 Say<span className="text-blue-500">Hi</span>
-      </h1>
+    <main>
 
-      {/* Tagline */}
-      <p className="text-zinc-400 text-center max-w-md mb-12">
-        Say hi to someone new.  
-        Random text & video chat with strangers.
-      </p>
+      <Section className="bg-episode-1" ref={el => el && sections.current.push(el)}>
+        <h1 className="anime-title text-8xl md:text-9xl text-blue-400">
+          SAYHI
+        </h1>
+        <p className="max-w-2xl text-zinc-200 text-xl">
+          In a world where strangers never meet…
+          <br /> one message can change everything.
+        </p>
+      </Section>
 
-      {/* Buttons */}
-      <div className="flex flex-col sm:flex-row gap-6 w-full max-w-sm">
-        {/* Text Chat */}
+      <Section className="bg-episode-2" ref={el => el && sections.current.push(el)}>
+        <h2 className="anime-title text-6xl">THE POWER</h2>
+        <div className="grid md:grid-cols-3 gap-10 max-w-6xl">
+          <Panel title="⚡ Instant Match" />
+          <Panel title="🕶️ Anonymous" />
+          <Panel title="🌍 Global Chat" />
+        </div>
+      </Section>
+
+      <Section className="bg-episode-3" ref={el => el && sections.current.push(el)}>
+        <h2 className="anime-title text-6xl text-pink-400">
+          THE CHARACTERS
+        </h2>
+        <p className="text-xl text-zinc-200 max-w-3xl">
+          You are not a profile.
+          <br /> You are a story unfolding.
+        </p>
+      </Section>
+
+      <Section className="bg-episode-4" ref={el => el && sections.current.push(el)}>
+        <h2 className="anime-title text-6xl text-red-400">
+          ENTER THE ACTION
+        </h2>
+        <div className="flex gap-6">
+          <ActionButton label="💬 TEXT MODE" onClick={() => router.push("/text")} />
+          <ActionButton label="🎥 VIDEO MODE" onClick={() => router.push("/video")} />
+        </div>
+      </Section>
+
+      <Section className="bg-final" ref={el => el && sections.current.push(el)}>
+        <h2 className="anime-title text-7xl">
+          YOUR STORY STARTS NOW
+        </h2>
         <button
           onClick={() => router.push("/text")}
-          className="w-full px-6 py-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-all font-semibold text-lg border border-zinc-700"
+          className="px-14 py-6 bg-blue-600 rounded-xl text-xl hover:scale-110 transition"
         >
-          💬 Text Chat
+          SAY HI 🚀
         </button>
+      </Section>
 
-        {/* Video Chat */}
-        <button
-          onClick={() => router.push("/video")}
-          className="w-full px-6 py-4 rounded-xl bg-blue-600 hover:bg-blue-700 transition-all font-semibold text-lg shadow-lg"
-        >
-          🎥 Video Chat
-        </button>
-      </div>
-
-      {/* Footer */}
-      <footer className="absolute bottom-6 text-sm text-zinc-500">
-        © {new Date().getFullYear()} SayHi · Chat with strangers
-      </footer>
     </main>
   )
 }
+
+/* ---------------- COMPONENTS ---------------- */
+
+const Section = forwardRef<
+  HTMLDivElement,
+  { children: React.ReactNode; className?: string }
+>(({ children, className }, ref) => (
+  <section
+    ref={ref}
+    className={`min-h-screen flex flex-col items-center justify-center gap-10 px-6 text-center ${className}`}
+  >
+    {children}
+  </section>
+))
+
+Section.displayName = "Section"
+
+const Panel = ({ title }: { title: string }) => (
+  <div className="comic-panel bg-zinc-900/80 backdrop-blur p-10 rounded-xl">
+    <h3 className="anime-title text-3xl mb-4">{title}</h3>
+    <p className="text-zinc-300">
+      Built for instant, real-time connection.
+    </p>
+  </div>
+)
+
+const ActionButton = ({
+  label,
+  onClick,
+}: {
+  label: string
+  onClick: () => void
+}) => (
+  <button
+    onClick={onClick}
+    className="px-10 py-5 bg-zinc-800 border-2 border-white rounded-xl hover:bg-zinc-700 hover:scale-105 transition"
+  >
+    {label}
+  </button>
+)
