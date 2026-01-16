@@ -116,3 +116,16 @@ body {
   background: radial-gradient(circle at 50% 50%, #3b82f680, transparent 45%),
     linear-gradient(180deg, #020617, #000);
 }
+@layer base {
+  .font-geist {
+    font-family: var(--font-geist-sans);
+  }
+
+  .font-mono {
+    font-family: var(--font-geist-mono);
+  }
+
+  .font-bangers {
+    font-family: var(--font-bangers);
+  }
+}
